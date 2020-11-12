@@ -25,11 +25,6 @@ desired_atoms=['CD1 LEU','CD2 LEU','CG1 VAL','CG2 VAL','N LEU','N VAL','N ILE','
 conversion={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','G':'GLY','V':'VAL','Y':'TYR','W':'TRP','T':'THR','S':'SER','P':'PRO','F':'PHE','M':'MET','K':'LYS','L':'LEU','I':'ILE','H':'HIS','Q':'GLN','E':'GLU'}
 
 def create_data():
-    global start
-    global end
-    global pdb_file
-    global distance_between_atoms
-    global desired_atoms
     aa_name=[]
     aa_position=[]
     with open(pdb_file) as pdb_file:
