@@ -12,8 +12,11 @@ Then simply type in an atom of an amino acid, and the program will find all atom
 E.G.
 
 PDB File = 1mmi.pdb
+
 Start = 1
+
 End = 243
+
 Chain = A
 
 We only wish to see the methyl groups that are within 5A of the methyl CD1 of Leucine 10
