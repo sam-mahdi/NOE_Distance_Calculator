@@ -2,41 +2,25 @@ import re
 import math
 import os
 
-"""
-Paramaters
-
-start and end are the bounadaries of regions you want to search in your pdb file  (e.g. if you only want a singular domain 144-340)
-pdb file is self explanatory
-distance between atoms is the distance (in angstroms) that it will search and display
-The desired atoms is a table of selected atoms to display, if you want to display every atom within your distance, leave it empty. To add entries, add them in this format 'atom 3-letter abr amino acid' I.E. 'CD1 LEU'
-So your desired_atoms would look like ['CD1 LEU','CD2 LEU','N LEU']
-"""
-start=1
-end=243
-pdb_file='1mmi.pdb'
-distance_between_atoms=5
-desired_atoms=['CD1 LEU','CD2 LEU','CG1 VAL','CG2 VAL','N LEU','N VAL','N ILE','CD1 ILE']
-
-
-
 
 ####SCRIPT START###
 
 conversion={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','G':'GLY','V':'VAL','Y':'TYR','W':'TRP','T':'THR','S':'SER','P':'PRO','F':'PHE','M':'MET','K':'LYS','L':'LEU','I':'ILE','H':'HIS','Q':'GLN','E':'GLU'}
 
-def create_data():
+def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
     aa_name=[]
     aa_position=[]
-    with open(pdb_file) as pdb_file:
-        for lines in pdb_file:
-            chain_search=re.search('(\w+\s+(\w+){3})\s+A\s+(\d+)\s+((\d+\.\d+\s+){3})',lines)
+    os.chdir(pdb_directory)
+    with open(pdb_file) as pdb_files:
+        for lines in pdb_files:
+            chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\d+\.\d+\s+){{3}})',lines)
             if chain_search != None:
-                if int(chain_search.group(3)) > start and int(chain_search.group(3)) < end:
-                    if (' '.join(chain_search.group(1).split())) in desired_atoms:
+                if int(chain_search.group(3)) > int(pdb_start) and int(chain_search.group(3)) < int(pdb_end):
+                    if (' '.join(chain_search.group(1).split())) in desired_molecules:
                         aa_name.append(' '.join(chain_search.group(1,3)))
                         aa_position.append(chain_search.group(4))
                         continue
-                    if desired_atoms == []:
+                    if desired_molecules == []:
                         aa_name.append(' '.join(chain_search.group(1,3)))
                         aa_position.append(chain_search.group(4))
 
@@ -51,7 +35,7 @@ def create_data():
                 distance=(((float(coordinates_1[0])-float(coordinates_2[0]))**2)+((float(coordinates_1[1])-float(coordinates_2[1]))**2)+((float(coordinates_1[2])-float(coordinates_2[2]))**2))
                 if distance>0:
                     sqrt_distance=math.sqrt(distance)
-                    if sqrt_distance<distance_between_atoms:
+                    if sqrt_distance<float(distance_between_atoms):
                         value_holder.append(name2)
                         number_holder.append(str(round(sqrt_distance,2)))
             output_file.write(f'{name} {" ".join(value_holder)} {" ".join(number_holder)}\n')
@@ -63,7 +47,7 @@ list1=[]
 list2=[]
 list3=[]
 
-def data_table():
+def data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
     global list0
     global list1
     global list2
@@ -98,7 +82,16 @@ def data_table():
             list0.pop(-1)
             list1.pop(-1)
 
-def search_table(word,atom):
+def search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
+    global list0
+    global list1
+    global list2
+    global list3
+    create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
+    data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
+    word=' '.join(search_parameters.split()[0:2])
+    atom=search_parameters.split()[2]
+    matches_list=[]
     amino_acid=word.split()
     amino_acid[0]=conversion[amino_acid[0]]
     word=' '.join(amino_acid)
@@ -110,40 +103,12 @@ def search_table(word,atom):
             if residue != '':
                 break
             else:
-                print(residue,atom_type,correlation,distance)
+                matches_list.append(f'{residue} {atom_type} {correlation} {distance}')
         if word_search != None and atom_search != None:
             counter+=1
-            print(residue,atom_type,correlation,distance)
-
-
-def make_table():
-    import pandas as pd
-
-    d={'Residue':[],'Atom Type':[],'Correlation':[],'Distance(A)':[]}
-
-    d['Residue']=list0
-    d['Atom Type']=list1
-    d['Correlation']=list2
-    d['Distance(A)']=list3
-
-    df=pd.DataFrame.from_dict(d)
-    view=df.replace('', method='ffill').query('Residue == "LEU 241"')
-    view.loc[ view.duplicated('Residue'), 'Residue' ] = ''
-    #pd.set_option('display.max_rows', None)
-    df.to_csv(r'data_table.txt',sep='\t')
-
-def main_loop():
-    create_data()
-    data_table()
-    make_table()
-    while True:
-        question=(input('amino number atom (i.e. I 166 CD1). When finished, type quit to exit: ').split())
-        try:
-            if question[0] == 'quit':
-                os.remove('output.txt')
-                break
-            search_table((' '.join(question[0:2])),question[2])
-        except:
-            print('Invalid entry\nTry Again')
-
-main_loop()
+            matches_list.append(f'Atom Searched: {residue} {atom_type} \n  Matches found: \n  {correlation} {distance}')
+    list0.clear()
+    list1.clear()
+    list2.clear()
+    list3.clear()
+    return matches_list
