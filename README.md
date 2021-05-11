@@ -1,6 +1,8 @@
 # NOE_Distance_Calculator
 Uses a PDB file to calculate NOE distances within a desired distance for desired atoms
 
+***program to run is NOE_GUI.py***
+
 Upload your PDB file, indicate the boundaries of the sequence of your protein (numbering must match PDB numbering), and the PDB chain to search. 
 
 Check what atoms of which amino acids you wish to search, and what is the cutoff for the distance you wish to see for an amino acid. 
