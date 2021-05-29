@@ -11,16 +11,17 @@ def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_
     aa_name=[]
     aa_position=[]
     os.chdir(pdb_directory)
+    word=' '.join(search_parameters.split()[0:2])
+    atom=search_parameters.split()[2]
+    amino_acid=word.split()
+    amino_acid[0]=conversion[amino_acid[0]]
+    desired_molecules.append(atom+' '+amino_acid[0])
     with open(pdb_file) as pdb_files:
         for lines in pdb_files:
             chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\d+\.\d+\s+){{3}})',lines)
             if chain_search != None:
                 if int(chain_search.group(3)) > int(pdb_start) and int(chain_search.group(3)) < int(pdb_end):
                     if (' '.join(chain_search.group(1).split())) in desired_molecules:
-                        aa_name.append(' '.join(chain_search.group(1,3)))
-                        aa_position.append(chain_search.group(4))
-                        continue
-                    if desired_molecules == []:
                         aa_name.append(' '.join(chain_search.group(1,3)))
                         aa_position.append(chain_search.group(4))
 
