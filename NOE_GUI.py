@@ -145,9 +145,21 @@ def main():
             text_area.insert(INSERT, errors+'\n')
         text_area.insert(INSERT, 'Please correct above errors and rerun')
     else:
+        remove_flag=False
+        word=' '.join(search_parameters.split()[0:2])
+        atom=search_parameters.split()[2]
+        amino_acid=word.split()
+        amino_acid[0]=conversion[amino_acid[0]]
+        if (atom+' '+amino_acid[0]) not in desired_molecules:
+            remove_flag=True
         from noe_distance_gui_calculator import search_table
         matches_list=search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
+        if len(matches_list) == 0:
+            text_area.insert(INSERT, 'No matches found')
         for matches in matches_list:
+            if remove_flag is True:
+                if ' '.join(matches.split()[0:2]) == (atom+' '+amino_acid[0]):
+                    continue
             text_area.insert(INSERT, matches+'\n')
 
 
