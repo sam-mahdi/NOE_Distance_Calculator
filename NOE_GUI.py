@@ -123,6 +123,9 @@ def search():
 
 def clear():
     text_area.delete(1.0,END)
+    
+conversion={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','G':'GLY','V':'VAL','Y':'TYR','W':'TRP','T':'THR','S':'SER','P':'PRO','F':'PHE','M':'MET','K':'LYS','L':'LEU','I':'ILE','H':'HIS','Q':'GLN','E':'GLU'}
+    
 
 def main():
     from pdb_upload_window import variables
