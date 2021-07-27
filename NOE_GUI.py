@@ -23,7 +23,7 @@ class ReadOnlyText(st.ScrolledText):
         return wrap
 
 
-ttk.Label(root,text = "Program Output",font = ("Times New Roman", 15),background = 'green',foreground = "white").grid(column = 0, row = 15)
+ttk.Label(root,text = "Program Output",font = ("Times New Roman", 15),background = 'green',foreground = "white").grid(column = 1, row = 15)
 
 text_area = ReadOnlyText(root,width = 60,height = 15,font = ("Times New Roman",12))
 
@@ -103,6 +103,8 @@ def desired_atoms():
         atom_list.append('NE2')
     if asn_nitrogen.get()!=0:
         atom_list.append('ND2')
+    if trp_nitrogen.get()!=0:
+        atom_list.append('NE1')    
     return atom_list
 
 pdb_file=()
@@ -205,6 +207,7 @@ epsilon_carbon1= IntVar()
 epsilon_carbon2= IntVar()
 gln_nitrogen= IntVar()
 asn_nitrogen= IntVar()
+trp_nitrogen= IntVar()
 Label(root, text='Atoms').grid(row=0, sticky=W)
 Label(root, text='Amino acids').grid(row=0,column=1, sticky=W)
 Label(root, text='Distance').grid(row=11,column=1, sticky=W)
@@ -247,6 +250,7 @@ Checkbutton(root, text="CE1", variable=epsilon_carbon1).grid(row=11,column=0, st
 Checkbutton(root, text="CE2", variable=epsilon_carbon2).grid(row=12,column=0, sticky=W)
 Checkbutton(root, text="GLN NH2", variable=gln_nitrogen).grid(row=13,column=0, sticky=W)
 Checkbutton(root, text="ASN NH2", variable=asn_nitrogen).grid(row=14,column=0, sticky=W)
+Checkbutton(root, text="TRP NE1", variable=trp_nitrogen).grid(row=15,column=0, sticky=W)
 
 Button(root, text='Quit', command=root.quit).grid(row=13,column=3, sticky=W)
 Button(root, text='Run', command=main).grid(row=13,column=2, sticky=W)
