@@ -18,7 +18,7 @@ def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_
     desired_molecules.append(atom+' '+amino_acid[0])
     with open(pdb_file) as pdb_files:
         for lines in pdb_files:
-            chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\d+\.\d+\s+){{3}})',lines)
+            chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\-*\d+\.\d+\s+){{3}})',lines)
             if chain_search != None:
                 if int(chain_search.group(3)) > int(pdb_start) and int(chain_search.group(3)) < (int(pdb_end)+1):
                     if (' '.join(chain_search.group(1).split())) in desired_molecules:
