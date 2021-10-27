@@ -104,7 +104,7 @@ def desired_atoms():
     if asn_nitrogen.get()!=0:
         atom_list.append('ND2')
     if trp_nitrogen.get()!=0:
-        atom_list.append('NE1')    
+        atom_list.append('NE1')
     return atom_list
 
 pdb_file=()
@@ -125,9 +125,9 @@ def search():
 
 def clear():
     text_area.delete(1.0,END)
-    
+
 conversion={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','G':'GLY','V':'VAL','Y':'TYR','W':'TRP','T':'THR','S':'SER','P':'PRO','F':'PHE','M':'MET','K':'LYS','L':'LEU','I':'ILE','H':'HIS','Q':'GLN','E':'GLU'}
-    
+
 
 def main():
     from pdb_upload_window import variables
@@ -142,7 +142,7 @@ def main():
     desired_molecules=[]
     for atom in atoms:
         for amino_acid in amino_acids:
-            desired_molecules.append(atom+' '+amino_acid)   
+            desired_molecules.append(atom+' '+amino_acid)
     from check_files import checker
     error_list=checker(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
     if error_list != []:
@@ -151,10 +151,9 @@ def main():
         text_area.insert(INSERT, 'Please correct above errors and rerun\n')
     else:
         remove_flag=False
-        word=' '.join(search_parameters.split()[0:2])
-        atom=search_parameters.split()[2]
-        amino_acid=word.split()
-        amino_acid[0]=conversion[amino_acid[0]]
+        search=re.search('\s*([A-Z])\s*(\d+)\s*([A-Z]+\d*)\s*',search_parameters)
+        atom=search.group(3)
+        amino_acid=conversion[search.group(1)]+' '+search.group(2)
         if (atom+' '+amino_acid[0]) not in desired_molecules:
             remove_flag=True
         from noe_distance_gui_calculator import search_table
