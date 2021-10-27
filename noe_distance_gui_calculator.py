@@ -13,7 +13,7 @@ def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_
     os.chdir(pdb_directory)
     search=re.search('\s*([A-Z])\s*(\d+)\s*([A-Z]+\d*)\s*',search_parameters)
     atom=search.group(3)
-    desired_molecules.append(conversion[search.group(1)]+' '+search.group(2))
+    desired_molecules.append(atom+ ' '+conversion[search.group(1)])
     with open(pdb_file) as pdb_files:
         for lines in pdb_files:
             chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\-*\d+\.\d+\s+){{3}})',lines)
