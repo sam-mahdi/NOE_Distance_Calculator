@@ -4,7 +4,7 @@ from tkinter import ttk
 import functools
 
 root = Tk()
-
+root.title('NOE Distance Calculator')
 class ReadOnlyText(st.ScrolledText):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
