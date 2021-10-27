@@ -17,6 +17,6 @@ def checker(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atom
     if search_parameters == ():
         errors.append('No search has been defined. Make sure to click ENTER when adding value')
     else:
-        if re.search('[A-Z]\s+\d+\s[A-Z]+',search_parameters) is None:
+        if re.search('\s*([A-Z])\s*(\d+)\s*([A-Z]+\d*)\s*',search_parameters) is None:
             errors.append('Search is in the improper format. Make sure search is in correct format (amino acid type, residue number, atom)')
     return errors
