@@ -5,6 +5,7 @@ import functools
 
 root = Tk()
 root.title('NOE Distance Calculator')
+
 class ReadOnlyText(st.ScrolledText):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -154,17 +155,31 @@ def main():
         search=re.search('\s*([A-Z])\s*(\d+)\s*([A-Z]+\d*)\s*',search_parameters)
         atom=search.group(3)
         amino_acid=conversion[search.group(1)]+' '+search.group(2)
-        if (atom+' '+amino_acid[0]) not in desired_molecules:
+        if (atom+' '+conversion[amino_acid[0]]) not in desired_molecules:
             remove_flag=True
         from noe_distance_gui_calculator import search_table
         matches_list=search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
         if len(matches_list) == 0:
-            text_area.insert(INSERT, 'No matches found\n')
-        for matches in matches_list:
-            if remove_flag is True:
-                if ' '.join(matches.split()[0:2]) == (atom+' '+conversion[amino_acid[0]]):
-                    continue
-            text_area.insert(INSERT, matches+'\n')
+            text_area.insert(INSERT, '\nNo Matches Found\n')
+        elif matches_list[0] == 'No':
+            text_area.insert(INSERT, f'\nSearched atoms {search_parameters} not found in PDB file, please check sequence and try again\n')
+        else:
+            new_matches_list=[]
+            for match in matches_list:
+                new_matches_list.append(tuple([' '.join(match.split()[0:3]),match.split()[3]]))
+            sorted_list=sorted(new_matches_list,key=lambda tup: tup[1])
+            filtered_list=[]
+            for matches in sorted_list:
+                if remove_flag is True:
+                    if ' '.join(matches[0].split()[0:2]) == (atom+' '+conversion[amino_acid[0]]):
+                        continue
+                filtered_list.append(matches)
+            if len(filtered_list) == 0:
+                text_area.insert(INSERT, '\nNo Matches Found\n')
+            else:
+                text_area.insert(INSERT,f'Atom Searched: {amino_acid} {atom} \n Matches Found: \n')
+                for filtered_matches in filtered_list:
+                    text_area.insert(INSERT, ' '.join(filtered_matches)+'\n')
 
 
 def pdb_window():
