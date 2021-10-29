@@ -162,7 +162,7 @@ def main():
             text_area.insert(INSERT, 'No matches found\n')
         for matches in matches_list:
             if remove_flag is True:
-                if ' '.join(matches.split()[0:2]) == (atom+' '+amino_acid[0]):
+                if ' '.join(matches.split()[0:2]) == (atom+' '+conversion[amino_acid[0]]):
                     continue
             text_area.insert(INSERT, matches+'\n')
 
