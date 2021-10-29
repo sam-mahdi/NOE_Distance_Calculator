@@ -7,23 +7,27 @@ import os
 
 conversion={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','G':'GLY','V':'VAL','Y':'TYR','W':'TRP','T':'THR','S':'SER','P':'PRO','F':'PHE','M':'MET','K':'LYS','L':'LEU','I':'ILE','H':'HIS','Q':'GLN','E':'GLU'}
 
+wrong_pdb=True
+
 def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
+    global wrong_pdb
     aa_name=[]
     aa_position=[]
     os.chdir(pdb_directory)
     search=re.search('\s*([A-Z])\s*(\d+)\s*([A-Z]+\d*)\s*',search_parameters)
     atom=search.group(3)
     desired_molecules.append(atom+ ' '+conversion[search.group(1)])
+    wrong_pdb=True
     with open(pdb_file) as pdb_files:
         for lines in pdb_files:
             chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\-*\d+\.\d+\s+){{3}})',lines)
             if chain_search != None:
                 if int(chain_search.group(3)) > int(pdb_start) and int(chain_search.group(3)) < (int(pdb_end)+1):
+                    if ((' '.join(chain_search.group(1).split()))+' '+chain_search.group(3)) == f'{atom} {conversion[search.group(1)]} {search.group(2)}':
+                        wrong_pdb=False
                     if (' '.join(chain_search.group(1).split())) in desired_molecules:
                         aa_name.append(' '.join(chain_search.group(1,3)))
                         aa_position.append(chain_search.group(4))
-
-
     value_holder=[]
     number_holder=[]
     with open('output.txt','w') as output_file:
@@ -103,9 +107,13 @@ def search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between
                 matches_list.append(f'{residue} {atom_type} {correlation} {distance}')
         if word_search != None and atom_search != None:
             counter+=1
-            matches_list.append(f'Atom Searched: {residue} {atom_type} \n  Matches found: \n  {correlation} {distance}')
+            matches_list.append(f' {correlation} {distance}')
     list0.clear()
     list1.clear()
     list2.clear()
     list3.clear()
-    return matches_list
+    if wrong_pdb is True:
+        matches_list=['No']
+        return matches_list
+    else:
+        return matches_list
