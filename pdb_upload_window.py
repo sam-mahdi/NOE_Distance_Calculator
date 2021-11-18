@@ -7,6 +7,7 @@ pdb_directory=()
 pdb_start=()
 pdb_end=()
 chain=()
+use_all_chains= IntVar()
 
 class newTopLevel(object):
     def __init__(self, root):
@@ -33,6 +34,7 @@ class newTopLevel(object):
         self.pdb_chain_line.grid(row=3, column=1)
         self.newWindow.btn = Button(self.newWindow,text='enter',command=self.pdb_chain_input)
         self.newWindow.btn.grid(row=3,column=2)
+        Checkbutton(self.newWindow, text="Search All Chains", variable=use_all_chains).grid(row=4,column=1, sticky=W)
 
 
 
@@ -60,4 +62,4 @@ class newTopLevel(object):
         chain=pdb_chain_inputs
 
 def variables():
-    return pdb_file,pdb_directory,pdb_start,pdb_end,chain
+    return pdb_file,pdb_directory,pdb_start,pdb_end,chain,use_all_chains.get()
