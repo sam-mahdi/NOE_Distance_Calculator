@@ -8,8 +8,9 @@ import os
 conversion={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','G':'GLY','V':'VAL','Y':'TYR','W':'TRP','T':'THR','S':'SER','P':'PRO','F':'PHE','M':'MET','K':'LYS','L':'LEU','I':'ILE','H':'HIS','Q':'GLN','E':'GLU'}
 
 wrong_pdb=True
+use_all_chains=True
 
-def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
+def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules,use_all_chains):
     global wrong_pdb
     aa_name=[]
     aa_position=[]
@@ -18,19 +19,25 @@ def create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_
     atom=search.group(3)
     desired_molecules.append(atom+ ' '+conversion[search.group(1)])
     wrong_pdb=True
+    if use_all_chains != 0:
+        chain='\w+'
     with open(pdb_file) as pdb_files:
         for lines in pdb_files:
-            chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+{chain}\s+(\d+)\s+((\-*\d+\.\d+\s+){{3}})',lines)
+            chain_search=re.search(f'(\w+\s+(\w+){{3}})\s+({chain})\s+(\d+)\s+((\-*\d+\.\d+\s+){{3}})',lines)
             if chain_search != None:
-                if int(chain_search.group(3)) > int(pdb_start) and int(chain_search.group(3)) < (int(pdb_end)+1):
-                    if ((' '.join(chain_search.group(1).split()))+' '+chain_search.group(3)) == f'{atom} {conversion[search.group(1)]} {search.group(2)}':
+                if int(chain_search.group(4)) > int(pdb_start) and int(chain_search.group(4)) < (int(pdb_end)+1):
+                    if ((' '.join(chain_search.group(1).split()))+' '+chain_search.group(4)) == f'{atom} {conversion[search.group(1)]} {search.group(2)}':
                         wrong_pdb=False
                     if (' '.join(chain_search.group(1).split())) in desired_molecules:
-                        aa_name.append(' '.join(chain_search.group(1,3)))
-                        aa_position.append(chain_search.group(4))
+                        if use_all_chains != 0:
+                            aa_name.append(' '.join(chain_search.group(1,4))+' '+chain_search.group(3))
+                            aa_position.append(chain_search.group(5))
+                        else:
+                            aa_name.append(' '.join(chain_search.group(1,4)))
+                            aa_position.append(chain_search.group(5))
     value_holder=[]
     number_holder=[]
-    with open('output.txt','w') as output_file:
+    with open('NOE_distance_output.txt','w') as output_file:
         for name,position in zip(aa_name,aa_position):
             for name2,position2 in zip(aa_name,aa_position):
                 coordinates_1=position.split()
@@ -50,12 +57,12 @@ list1=[]
 list2=[]
 list3=[]
 
-def data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
+def data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules,use_all_chains):
     global list0
     global list1
     global list2
     global list3
-    with open('output.txt') as file:
+    with open('NOE_distance_output.txt') as file:
         for lines in file:
             a=lines.split()
             temp_list=[]
@@ -68,30 +75,34 @@ def data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_a
                 counter+=1
                 if counter == 1:
                     list1.append(values)
-                if counter < 3 and counter > 1:
+                    if use_all_chains == 0:
+                        counter+=1
+                if counter < 4 and counter > 1:
                     temp_list.append(values)
-                if counter == 3:
+                if counter == 4:
                     temp_list.append(values)
                     list0.append((' '.join(temp_list)))
                     temp_list.clear()
-                if counter > 3:
+                if counter > 4:
                     temp_list.append(values)
-                if counter == 6:
+                if use_all_chains == 0 and counter == 7:
+                    counter+=1
+                if counter == 8:
                     list0.append('')
                     list1.append('')
                     list2.append((' '.join(temp_list)))
                     temp_list.clear()
-                    counter=3
+                    counter=4
             list0.pop(-1)
             list1.pop(-1)
 
-def search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules):
+def search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules,use_all_chains):
     global list0
     global list1
     global list2
     global list3
-    create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
-    data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
+    create_data(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules,use_all_chains)
+    data_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules,use_all_chains)
     search=re.search('\s*([A-Z])\s*(\d+)\s*([A-Z]+\d*)\s*',search_parameters)
     atom=search.group(3)
     matches_list=[]
@@ -106,8 +117,13 @@ def search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between
             else:
                 matches_list.append(f'{residue} {atom_type} {correlation} {distance}')
         if word_search != None and atom_search != None:
-            counter+=1
-            matches_list.append(f' {correlation} {distance}')
+            if use_all_chains != 0:
+                if residue.split()[2] == chain:
+                    counter+=1
+                    matches_list.append(f' {correlation} {distance}')
+            else:
+                counter+=1
+                matches_list.append(f' {correlation} {distance}')
     list0.clear()
     list1.clear()
     list2.clear()
