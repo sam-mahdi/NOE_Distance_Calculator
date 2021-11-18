@@ -115,6 +115,7 @@ pdb_end=()
 chain=()
 distance_between_atoms=()
 search_parameters=()
+use_all_chains=()
 
 def distance_constraint():
     global distance_between_atoms
@@ -137,7 +138,7 @@ def main():
     global pdb_start
     global pdb_end
     global chain
-    pdb_file,pdb_directory,pdb_start,pdb_end,chain=variables()
+    pdb_file,pdb_directory,pdb_start,pdb_end,chain,use_all_chains=variables()
     atoms=desired_atoms()
     amino_acids=desired_amino_acids()
     desired_molecules=[]
@@ -158,7 +159,7 @@ def main():
         if (atom+' '+conversion[amino_acid[0]]) not in desired_molecules:
             remove_flag=True
         from noe_distance_gui_calculator import search_table
-        matches_list=search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules)
+        matches_list=search_table(pdb_file,pdb_directory,pdb_start,pdb_end,chain,distance_between_atoms,search_parameters,desired_molecules,use_all_chains)
         if len(matches_list) == 0:
             text_area.insert(INSERT, '\nNo Matches Found\n')
         elif matches_list[0] == 'No':
@@ -166,7 +167,13 @@ def main():
         else:
             new_matches_list=[]
             for match in matches_list:
-                new_matches_list.append(tuple([' '.join(match.split()[0:3]),match.split()[3]]))
+                if use_all_chains == 0:
+                    new_matches_list.append(tuple([' '.join(match.split()[0:3]),match.split()[3]]))
+                else:
+                    if match.split()[3] == chain:
+                        new_matches_list.append(tuple([' '.join(match.split()[0:3]),match.split()[4]]))
+                    else:
+                        new_matches_list.append(tuple([' '.join(match.split()[0:4]),match.split()[4]]))
             sorted_list=sorted(new_matches_list,key=lambda tup: tup[1])
             filtered_list=[]
             for matches in sorted_list:
